@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -18,6 +19,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -77,4 +84,15 @@ dependencies {
 
     // Extended Icons
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
+
+    // Hilt
+    val hiltAndroid = "2.48.1"
+    val hiltNavigationCompose = "1.1.0"
+    implementation("com.google.dagger:hilt-android:$hiltAndroid")
+    implementation("androidx.hilt:hilt-navigation-compose:${hiltNavigationCompose}")
+    kapt("com.google.dagger:hilt-android-compiler:$hiltAndroid")
+}
+
+kapt {
+    correctErrorTypes = true
 }

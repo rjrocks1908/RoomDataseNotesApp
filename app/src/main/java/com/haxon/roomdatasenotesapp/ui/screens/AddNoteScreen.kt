@@ -13,27 +13,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.haxon.roomdatasenotesapp.presentation.NoteState
 import com.haxon.roomdatasenotesapp.presentation.NotesEvent
+import com.haxon.roomdatasenotesapp.presentation.NotesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteScreen(
-    state: NoteState,
     navController: NavController,
-    onEvent: (NotesEvent) -> Unit
+    viewModel: NotesViewModel = hiltViewModel()
 ) {
 
+    val state by viewModel.state.collectAsState()
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                onEvent(
+                viewModel.onEvent(
                     NotesEvent.SaveNote(
                         title = state.title.value,
                         description = state.description.value

@@ -4,7 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haxon.roomdatasenotesapp.data.Note
-import com.haxon.roomdatasenotesapp.data.NoteDao
+import com.haxon.roomdatasenotesapp.data.NotesRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -12,16 +14,21 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NotesViewModel(private val dao: NoteDao) : ViewModel() {
+@HiltViewModel
+class NotesViewModel @Inject constructor(
+    private val notesRepository: NotesRepository
+) : ViewModel() {
 
     private val isSortedByDateAdded = MutableStateFlow(true)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private var notes = isSortedByDateAdded.flatMapLatest { sort ->
         if (sort) {
-            dao.getNotesOrderByDateAdded()
+            notesRepository.getNotesOrderByDateAdded()
         } else {
-            dao.getNotesOrderByTitle()
+            notesRepository.getNotesOrderByTitle()
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
     }
 
@@ -37,7 +44,7 @@ class NotesViewModel(private val dao: NoteDao) : ViewModel() {
         when (event) {
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
-                    dao.deleteNote(event.note)
+                    notesRepository.deleteNote(event.note)
                 }
             }
 
@@ -49,7 +56,7 @@ class NotesViewModel(private val dao: NoteDao) : ViewModel() {
                 )
 
                 viewModelScope.launch {
-                    dao.upsertNote(note)
+                    notesRepository.upsertNote(note)
                 }
 
                 _state.update {

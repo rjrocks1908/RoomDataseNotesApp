@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,19 +33,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.haxon.roomdatasenotesapp.R
 import com.haxon.roomdatasenotesapp.presentation.NoteState
 import com.haxon.roomdatasenotesapp.presentation.NotesEvent
+import com.haxon.roomdatasenotesapp.presentation.NotesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
-    state: NoteState,
-    navController: NavController,
-    onEvent: (NotesEvent) -> Unit
+    showAddNoteScreen: () -> Unit,
+    viewModel: NotesViewModel = hiltViewModel(),
 ) {
 
+    val state by viewModel.state.collectAsState()
     Scaffold(
         topBar = {
             Row(
@@ -63,7 +67,7 @@ fun NotesScreen(
                 )
 
                 IconButton(onClick = {
-                    onEvent(NotesEvent.SortNotes)
+                    viewModel.onEvent(NotesEvent.SortNotes)
                 }) {
                     Icon(
                         imageVector = Icons.Rounded.Sort,
@@ -78,7 +82,7 @@ fun NotesScreen(
             FloatingActionButton(onClick = {
                 state.title.value = ""
                 state.description.value = ""
-                navController.navigate("AddNoteScreen")
+                showAddNoteScreen()
             }) {
                 Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add new note")
             }
@@ -94,7 +98,7 @@ fun NotesScreen(
         ) {
 
             items(state.notes.size) { index ->
-                NoteItem(state = state, index = index, onEvent = onEvent)
+                NoteItem(state = state, index = index, onEvent = viewModel::onEvent)
             }
 
         }
